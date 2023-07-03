@@ -48,6 +48,14 @@ _\*) **Important!** The value of `ECR_REPO_NAME` in `/entrypoint.sh` **must** be
 
 # Repo structure & concept:
 
+## Birdseye view
+
+The infrastructure consists entirely of AWS resources configured in Terraform modules. It deploys the NodeJS application in `/app` on ECS using [Fargate](https://aws.amazon.com/fargate/). The ECS cluster is deployed behind a Load Balancer. Based on the CPU and Memory usage, ECS will scale the deployment up or down.
+
+The application itself consists of two endpoints - `/smashes` and `/smash` - that send `GET` and `POST` requests, respectively. It connects to a MySQL database in an AWS RDS instance to read and insert records from a single table called `smashes`. As the web page is loaded, the app requests the total count of smashes. Via having the `SMASH` button clicked, it inserts a new smash (row) and requests the total count of smashes again.
+
+## Folder structure
+
 ```
 ├── app
 │   ├── public
@@ -108,12 +116,6 @@ _\*) **Important!** The value of `ECR_REPO_NAME` in `/entrypoint.sh` **must** be
 └── variables.tf
 ```
 
-## Birdseye view
-
-The infrastructure consists entirely of AWS resources configured in Terraform modules. It deploys the NodeJS application in `/app` on ECS using [Fargate](https://aws.amazon.com/fargate/). The ECS cluster is deployed behind a Load Balancer. Based on the CPU and Memory usage, ECS will scale the deployment up or down.
-
-The application itself consists of two endpoints - `/smashes` and `/smash` - that send `GET` and `POST` requests, respectively. It connects to a MySQL database in an AWS RDS instance to read and insert records from a single table called `smashes`. As the web page is loaded, the app requests the total count of smashes. Via having the `SMASH` button clicked, it inserts a new smash (row) and requests the total count of smashes again.
-
 ## Deployment flow
 
 The entire deployment of the project is triggered by `/entrypoint.sh` where the execution is divided into three stages. The intention behind this was to have the ability to deploy the entire project with a single command.
@@ -146,9 +148,7 @@ The following environment variables are used in by the web app and, therefore, b
 
 _\*) In a production environment, sensitive data, such as passwords, should not be stored publicly! It should always be stored in secure locations and/or handled by appropriate tools._
 
-_\*\*) **Important!** The value of `ECR_REPO_NAME` in `/entrypoint.sh` **must** be the same as the terraform variable `resource_identifier` in `/variables.tf`_
-
-_**Note**: the provided `.env` file is for local development/testing (see `docker-compose.yaml`). It is not required for the provisioning flow._
+\_\*\*) **Important!** The value of `ECR_REPO_NAME` in `/entrypoint.sh` **must** be the same as the terraform variable `resource_identifier` in `/variables.tf`
 
 ## Seeding the database
 
@@ -207,6 +207,8 @@ resource "aws_appautoscaling_policy" "policy" {
 }
 ```
 
+</details>
+
 _\*) **Note:** The tasks that have been deployed due to autoscaling will be **removed** when if the ECS cluster is updated. I.e., if the Terraform configuration is reapplied, the number of tasks will drop to 1, as per the `desired_count` parameter of the ECS service. The `desired_count` parameter should be set, as if it is not, it defaults to `null`, which results in the deprovisioning off all tasks on reapplying the TF configuration._
 
 ## Cloudwatch alarm
@@ -236,7 +238,7 @@ Since Terraform is used for infrastructure provisioning, tearing everything down
 
 - Run `terraform state list` at the root level of this repo to check the current state of the infrastructure deployed by Terraform.
 
-- A `docker-compose` file is available for local development/testing. Note that to run the app locally, the `/.env` file should have a appropriate environment variables.
+- A `docker-compose` file is available for local development/testing. Note that to run the app locally, a `.env` file with the required environment variables should be present at the root level of the repository.
 
 - There are a few additional utility scripts in `/utils`:
 

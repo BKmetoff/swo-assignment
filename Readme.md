@@ -136,19 +136,13 @@ The `/entrypoint.sh` script takes care of this provisioning by targeting specifi
 
 The following environment variables are used in by the web app and, therefore, by ECS:
 
-```
-DB_NAME
-RDS_HOSTNAME
-RDS_PASSWORD
-RDS_PORT
-RDS_USERNAME
-```
-
-The value of `RDS_PASSWORD`\* is provided as an argument of `/entrypoint.sh` and passed by it to Terraform via the CLI `-var` flag.
-
-The values of `RDS_HOSTNAME`, `RDS_PORT`, `RDS_USERNAME` are outputted by the RDS module and injected as variables into the ESC module.
-
-The value of `DB_NAME` is set as a default value in `/variables.tf`\*\*
+| Variable name  | Value                                                                                          |
+| :------------- | :--------------------------------------------------------------------------------------------- |
+| `RDS_PASSWORD` | Provded as an argument to`/entrypoint.sh`\.\* and passed to Terraform via the CLI `-var` flag. |
+| `DB_NAME`      | Default value is set in `/variables.tf`\*\*                                                    |
+| `RDS_HOSTNAME` | Outputted by the RDS module and injected as variables into the ESC module.                     |
+| `RDS_PORT`     | Outputted by the RDS module and injected as variables into the ESC module.                     |
+| `RDS_USERNAME` | Outputted by the RDS module and injected as variables into the ESC module.                     |
 
 _\*) In a production environment, sensitive data, such as passwords, should not be stored publicly! It should always be stored in secure locations and/or handled by appropriate tools._
 
@@ -168,6 +162,66 @@ The `smashes` table consists of the following fields:
 | created_at | timestamp       | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
 
 \*_) In a production environment, database dumps/backups should **always** be stored in a secure location! A database dump is stored in this repository for demonstration purposes only._
+
+## ECS Autoscaling
+
+The autoscaling\* of the tasks running the web app is based on CPU and Memory usage. Since the NodeJS app is tiny, to see the autoscaling in action, the resources requested from ECS are set to a low number and so are the target values of the app autoscaling policies:
+
+```terraform
+container_definitions = [{
+    [...]
+    "cpu": 256,
+    "memory": 512
+    [...]
+  }]
+```
+
+```terraform
+locals {
+  metrics = [
+    {
+      name                   = "cpu",
+      target                 = 15,
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    },
+    {
+      name                   = "memory",
+      target                 = 10,
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+  ]
+}
+
+resource "aws_appautoscaling_policy" "policy" {
+  count = length(local.metrics)
+
+  [...]
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = local.metrics[count.index].predefined_metric_type
+    }
+
+    target_value = local.metrics[count.index].target
+  }
+}
+```
+
+_\*) **Note:** The tasks that have been deployed due to autoscaling will be **removed** when if the ECS cluster is updated. I.e., if the Terraform configuration is reapplied, the number of tasks will drop to 1, as per the `desired_count` parameter of the ECS service. The `desired_count` parameter should be set, as if it is not, it defaults to `null`, which results in the deprovisioning off all tasks on reapplying the TF configuration._
+
+## Cloudwatch alarm
+
+A CloudWatch alarm is set to track the number of requests hitting the ELB targets. To trigger a state change, it is set to track 10-minute periods. If the number of requests is higher than 20 for any given single period, it will go in an `ALARM` state. Currently, there are no actions attached to the it.
+
+```terraform
+resource "aws_cloudwatch_metric_alarm" "requests_alarm" {
+  [...]
+  datapoints_to_alarm = "1"
+  evaluation_periods  = "1"
+  threshold           = "5"
+  period              = "600"
+}
+```
 
 ## Tearing down the infrastructure
 

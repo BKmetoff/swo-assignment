@@ -20,7 +20,7 @@ package-lock.json
 
 # Environent
 .env.local
-# .env
+.env
 
 # Misc
 .DS_Store

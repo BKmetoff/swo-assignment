@@ -19,7 +19,7 @@ This repository contains Infrastructure as Code (IaC) and tools to assist in the
 
 - **Why use Terraform?** - Terraform allows deploying, keeping track, and maintaining, cloud infrastructure and infrastructure resources.
 - **Why AWS?** - AWS offers a vast array of cloud infrastructure resources that supports the deployment of applications. It's one of the most used cloud service providers. For the purpose of this exercise, AWS provides all the necessary resources, as well as resources that can be used on expanding the security, scalability, and flexibility of the project.
-- **Why Ansible?** - Ansible is an open-source set of provisioning, configuration management, and application deployment functionality tools aimed at easing the development and maintenance of infrastructure-as-code projects.
+
 - **Why Docker?** - Docker is a software platform that allows building, testing, and deploying applications quickly. Docker packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime .
 
 ## Prerequisites:

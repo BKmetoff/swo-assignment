@@ -1,0 +1,30 @@
+# Local IDE files
+.vscode
+.terraform.lock.hcl
+
+# Local .terraform directories
+**/.terraform/*
+.terraform
+workspace
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Teraform plan files
+*.out
+
+# Node
+node_modules
+package-lock.json
+
+# Environent
+.env.local
+# .env
+
+# Misc
+.DS_Store
+container_volume
+
+# ssh keys
+/ssh

@@ -1,0 +1,17 @@
+{
+  "name": "smash-dat-counter",
+  "version": "1.0.0",
+  "author": "bkmetoff@gmail.com",
+  "main": "app.js",
+  "private": true,
+  "dependencies": {
+    "ejs": "latest",
+    "aws-sdk": "latest",
+    "express": "latest",
+    "body-parser": "latest",
+    "mysql": "latest"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}

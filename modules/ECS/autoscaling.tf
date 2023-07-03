@@ -11,6 +11,21 @@
 # as they represent a percentage
 # of the respective resource
 
+locals {
+  metrics = [
+    {
+      name                   = "cpu",
+      target                 = 15,
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    },
+    {
+      name                   = "memory",
+      target                 = 10,
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+  ]
+}
+
 resource "aws_appautoscaling_target" "ecs_service_autoscaling_target" {
   max_capacity       = 10
   min_capacity       = 1
@@ -19,8 +34,11 @@ resource "aws_appautoscaling_target" "ecs_service_autoscaling_target" {
   service_namespace  = "ecs"
 }
 
-resource "aws_appautoscaling_policy" "cpu" {
-  name               = "${var.name}-app-autoscaling-policy-cpu"
+
+resource "aws_appautoscaling_policy" "policy" {
+  count = length(local.metrics)
+
+  name               = "${var.name}-app-autoscaling-policy-${local.metrics[count.index].name}"
   policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.ecs_service_autoscaling_target.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs_service_autoscaling_target.scalable_dimension
@@ -28,30 +46,12 @@ resource "aws_appautoscaling_policy" "cpu" {
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+      predefined_metric_type = local.metrics[count.index].predefined_metric_type
     }
 
-    target_value = 15
+    target_value = local.metrics[count.index].target
   }
 }
-
-resource "aws_appautoscaling_policy" "memory" {
-  name               = "${var.name}-app-autoscaling-policy-memory"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.ecs_service_autoscaling_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_service_autoscaling_target.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_service_autoscaling_target.service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
-    }
-
-    target_value = 10
-  }
-}
-
-
 
 data "aws_iam_policy_document" "ecs_service_scaling" {
   statement {

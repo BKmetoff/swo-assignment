@@ -1,6 +1,6 @@
 # Overview
 
-This repository contains Infrastructure as Code (IaC) and tools to assist in the deployment of a Wordpress service and an SQL database for it using [Terraform](https://www.terraform.io/), [AWS](https://aws.amazon.com/), and [Docker](https://www.docker.com/).
+This repository contains Infrastructure as Code (IaC) and tools to assist in the deployment of a NodeJS web application using [Terraform](https://www.terraform.io/), [AWS](https://aws.amazon.com/), and [Docker](https://www.docker.com/).
 
 ## Project requirements
 

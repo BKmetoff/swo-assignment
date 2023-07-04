@@ -249,3 +249,58 @@ Since Terraform is used for infrastructure provisioning, tearing everything down
 | `force_new_ecs_deployment.sh` | `$1` - AWS region <br/> `$2` - AWS account id <br/> `$3` - cluster name <br/> `$4` - service name | Updates and ECS service.                                                                                                  |
 | `init_db.sh`                  | N/A                                                                                               | Executes `/db/db_init.sql` into a MySQL server. <br/> Uses the `connection_params` output from `module.rds`               |
 | `ssh_into_ec2.sh`             | `$1` - a public IP address that                                                                   | Connects to an EC2 instance. <br/> The instance' IP address has to be added to the known hosts first                      |
+
+---
+
+<!-- BEGIN_TF_DOCS -->
+
+## Requirements
+
+| Name                                                   | Version |
+| ------------------------------------------------------ | ------- |
+| <a name="requirement_aws"></a> [aws](#requirement_aws) | ~> 4.22 |
+
+## Providers
+
+| Name                                             | Version |
+| ------------------------------------------------ | ------- |
+| <a name="provider_aws"></a> [aws](#provider_aws) | 4.67.0  |
+
+## Modules
+
+| Name                                                                 | Source                | Version |
+| -------------------------------------------------------------------- | --------------------- | ------- |
+| <a name="module_ec2_bastion"></a> [ec2_bastion](#module_ec2_bastion) | ./modules/EC2_bastion | n/a     |
+| <a name="module_ecr"></a> [ecr](#module_ecr)                         | ./modules/ECR         | n/a     |
+| <a name="module_ecs"></a> [ecs](#module_ecs)                         | ./modules/ECS         | n/a     |
+| <a name="module_efs"></a> [efs](#module_efs)                         | ./modules/EFS         | n/a     |
+| <a name="module_rds"></a> [rds](#module_rds)                         | ./modules/RDS         | n/a     |
+| <a name="module_vpc"></a> [vpc](#module_vpc)                         | ./modules/VPC         | n/a     |
+
+## Resources
+
+| Name                                                                                                                          | Type        |
+| ----------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+
+## Inputs
+
+| Name                                                                                       | Description                                   | Type     | Default            | Required |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------- | -------- | ------------------ | :------: |
+| <a name="input_aws_region"></a> [aws_region](#input_aws_region)                            | The region to provision resources in          | `string` | `"eu-west-1"`      |    no    |
+| <a name="input_db_password"></a> [db_password](#input_db_password)                         | The password of the DB user                   | `string` | n/a                |   yes    |
+| <a name="input_db_username"></a> [db_username](#input_db_username)                         | The username to be used for the RDS root used | `string` | `"swo"`            |    no    |
+| <a name="input_resource_identifier"></a> [resource_identifier](#input_resource_identifier) | A name to identify AWS resources by           | `string` | `"swo-assignment"` |    no    |
+
+## Outputs
+
+| Name                                                                                               | Description                                                               |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| <a name="output_connection_params"></a> [connection_params](#output_connection_params)             | Formatted string used to crate a database and a table in the RDS instance |
+| <a name="output_ec2_public_ip"></a> [ec2_public_ip](#output_ec2_public_ip)                         | The ID if the AWS account                                                 |
+| <a name="output_load_balancer_address"></a> [load_balancer_address](#output_load_balancer_address) | The addresses of the load balancer                                        |
+| <a name="output_rds_hostname"></a> [rds_hostname](#output_rds_hostname)                            | RDS instance hostname                                                     |
+| <a name="output_rds_port"></a> [rds_port](#output_rds_port)                                        | RDS instance port                                                         |
+| <a name="output_rds_username"></a> [rds_username](#output_rds_username)                            | RDS instance root username                                                |
+
+<!-- END_TF_DOCS -->
